@@ -45,7 +45,7 @@ template<typename T, typename Traits>
 class mknejp::vmcontainer::pinned_vector
 {
 public:
-  static_assert(std::is_destructible<T>::value, "value_type must satisfy Destructible concept");
+  // static_assert(std::is_destructible<T>::value, "value_type must satisfy Destructible concept");
   static_assert(std::ratio_greater<typename Traits::growth_factor, std::ratio<1, 1>>::value,
                 "growth factor must be greater than 1");
 
@@ -318,10 +318,12 @@ public:
       pos, ilist.size(), [&](T* d_first, T* d_last) { std::copy(ilist.begin(), ilist.end(), d_first); });
   }
   template<typename... Args>
-  auto emplace(const_iterator pos, Args&&... args) ->
+  auto emplace(const_iterator pos, Args&&... args) -> T&
+  /*
     typename std::enable_if<std::is_constructible<T, Args&&...>::value && std::is_move_constructible<T>::value
                               && std::is_move_assignable<T>::value,
                             T&>::type
+                            */
   {
     assert(is_valid_last_iterator(pos));
     grow_if_necessary(1);
