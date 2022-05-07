@@ -20,8 +20,10 @@
 #endif
 
 #include <cassert>
+#ifndef VMCONTAINER_NO_EXCEPTIONS
 #include <stdexcept>
 #include <system_error>
+#endif
 
 auto mknejp::vmcontainer::vm::system_default::reserve(std::size_t num_bytes) -> void*
 {
@@ -31,15 +33,23 @@ auto mknejp::vmcontainer::vm::system_default::reserve(std::size_t num_bytes) -> 
   auto const offset = ::VirtualAlloc(nullptr, num_bytes, MEM_RESERVE, PAGE_NOACCESS);
   if(offset == nullptr)
   {
+#ifdef VMCONTAINER_NO_EXCEPTIONS
+    return nullptr;
+#else
     auto const err = ::GetLastError();
     throw std::system_error(std::error_code(err, std::system_category()), "virtual memory reservation failed");
+#endif
   }
   return offset;
 #else
   auto const offset = ::mmap(nullptr, num_bytes, PROT_NONE, MAP_ANON | MAP_PRIVATE, 0, 0);
   if(offset == MAP_FAILED)
   {
+#ifdef VMCONTAINER_NO_EXCEPTIONS
+    return nullptr;
+#else
     throw std::system_error(std::error_code(errno, std::system_category()), "virtual memory reservation failed");
+#endif
   }
   return offset;
 #endif
@@ -66,13 +76,21 @@ auto mknejp::vmcontainer::vm::system_default::commit(void* offset, std::size_t n
   auto const result = ::VirtualAlloc(offset, num_bytes, MEM_COMMIT, PAGE_READWRITE);
   if(result == nullptr)
   {
+#ifdef VMCONTAINER_NO_EXCEPTIONS
+    std::abort();
+#else
     throw std::bad_alloc();
+#endif
   }
 #else
   auto const result = ::mprotect(offset, num_bytes, PROT_READ | PROT_WRITE);
   if(result != 0)
   {
+#ifdef VMCONTAINER_NO_EXCEPTIONS
+    std::abort();
+#else
     throw std::bad_alloc();
+#endif
   }
 #endif
 }
