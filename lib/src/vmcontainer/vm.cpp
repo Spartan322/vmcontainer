@@ -6,7 +6,7 @@
 
 #include "vmcontainer/vm.hpp"
 
-#ifdef WIN32
+#ifdef _WIN32
 #  ifndef NOMINMAX
 #    define NOMINMAX
 #  endif
@@ -29,7 +29,7 @@ auto mknejp::vmcontainer::vm::system_default::reserve(std::size_t num_bytes) -> 
 {
   assert(num_bytes > 0);
 
-#ifdef WIN32
+#ifdef _WIN32
   auto const offset = ::VirtualAlloc(nullptr, num_bytes, MEM_RESERVE, PAGE_NOACCESS);
   if(offset == nullptr)
   {
@@ -57,7 +57,7 @@ auto mknejp::vmcontainer::vm::system_default::reserve(std::size_t num_bytes) -> 
 
 auto mknejp::vmcontainer::vm::system_default::free(void* offset, std::size_t num_bytes) -> void
 {
-#ifdef WIN32
+#ifdef _WIN32
   auto const result = ::VirtualFree(offset, 0, MEM_RELEASE);
   (void)result;
   assert(result != 0);
@@ -72,7 +72,7 @@ auto mknejp::vmcontainer::vm::system_default::commit(void* offset, std::size_t n
 {
   assert(num_bytes > 0);
 
-#ifdef WIN32
+#ifdef _WIN32
   auto const result = ::VirtualAlloc(offset, num_bytes, MEM_COMMIT, PAGE_READWRITE);
   if(result == nullptr)
   {
@@ -97,7 +97,7 @@ auto mknejp::vmcontainer::vm::system_default::commit(void* offset, std::size_t n
 
 auto mknejp::vmcontainer::vm::system_default::decommit(void* offset, std::size_t num_bytes) -> void
 {
-#ifdef WIN32
+#ifdef _WIN32
   auto const result = ::VirtualFree(offset, num_bytes, MEM_DECOMMIT);
   (void)result;
   assert(result != 0);
@@ -112,7 +112,7 @@ auto mknejp::vmcontainer::vm::system_default::decommit(void* offset, std::size_t
 }
 
 std::size_t const mknejp::vmcontainer::vm::system_default::_page_size =
-#ifdef WIN32
+#ifdef _WIN32
   []() {
     auto info = SYSTEM_INFO{};
     ::GetSystemInfo(&info);
