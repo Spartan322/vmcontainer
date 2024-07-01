@@ -145,7 +145,7 @@ public:
   {
     if(pos >= size())
     {
-      throw std::out_of_range("index out of range");
+      VMCONTAINER_THROW_OR_ABORT(std::out_of_range("index out of range"));
     }
     return data()[pos];
   }
@@ -153,7 +153,7 @@ public:
   {
     if(pos >= size())
     {
-      throw std::out_of_range("index out of range");
+      VMCONTAINER_THROW_OR_ABORT(std::out_of_range("index out of range"));
     }
     return data()[pos];
   }

@@ -13,6 +13,31 @@
 #include <type_traits>
 #include <utility>
 
+#ifndef VMCONTAINER_HAS_EXCEPTIONS
+#  if __cpp_exceptions || _HAS_EXCEPTIONS
+#    define VMCONTAINER_HAS_EXCEPTIONS 1
+#  else
+#    define VMCONTAINER_HAS_EXCEPTIONS 0
+#  endif
+#endif
+
+#if VMCONTAINER_HAS_EXCEPTIONS
+#  define VMCONTAINER_THROW_OR_ABORT(_EXC) (throw(_EXC))
+#  define VMCOVMCONTAINER_RETHROW throw
+#  define VMCONTAINER_TRY try
+#  define VMCONTAINER_CATCH(...) catch(__VA_ARGS__)
+#else
+#  ifdef _MSC_VER
+#    define VMCONTAINER_THROW_OR_ABORT(_EXC) (_invoke_watson(nullptr, nullptr, nullptr, 0, 0))
+#    define VMCOVMCONTAINER_RETHROW (_invoke_watson(nullptr, nullptr, nullptr, 0, 0))
+#  else
+#    define VMCONTAINER_THROW_OR_ABORT(_EXC) (__builtin_abort())
+#    define VMCOVMCONTAINER_RETHROW (__builtin_abort())
+#  endif
+#  define VMCONTAINER_TRY
+#  define VMCONTAINER_CATCH(...) if constexpr(false)
+#endif
+
 namespace mknejp
 {
   namespace vmcontainer
@@ -222,17 +247,17 @@ auto mknejp::vmcontainer::detail::uninitialized_move_n(InputIt first, std::size_
   -> std::pair<InputIt, ForwardIt>
 {
   auto current = d_first;
-  try
+  VMCONTAINER_TRY
   {
     for(std::size_t i = 0; i < count; ++first, (void)++current, ++i)
     {
       construct_at(std::addressof(*current), std::move(*first));
     }
   }
-  catch(...)
+  VMCONTAINER_CATCH(...)
   {
     destroy(d_first, current);
-    throw;
+    VMCOVMCONTAINER_RETHROW;
   }
   return {first, current};
 }
@@ -241,17 +266,17 @@ template<typename ForwardIt>
 auto mknejp::vmcontainer::detail::uninitialized_value_construct_n(ForwardIt first, std::size_t count) -> ForwardIt
 {
   auto current = first;
-  try
+  VMCONTAINER_TRY
   {
     for(std::size_t i = 0; i < count; ++i, (void)++current)
     {
       construct_at(std::addressof(*current));
     }
   }
-  catch(...)
+  VMCONTAINER_CATCH(...)
   {
     destroy(first, current);
-    throw;
+    VMCOVMCONTAINER_RETHROW;
   }
   return current;
 }
