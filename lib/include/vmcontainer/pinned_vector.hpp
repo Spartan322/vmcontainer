@@ -132,9 +132,10 @@ public:
   auto assign(std::initializer_list<T> init) -> void { assign(init.begin(), init.end()); }
   template<typename InputIter>
   // requires InputIterator<InputIter>
-  auto assign(InputIter first, InputIter last) -> typename std::enable_if<
-    std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<InputIter>::iterator_category>::value,
-    void>::type
+  auto assign(InputIter first, InputIter last) ->
+    typename std::enable_if<
+      std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<InputIter>::iterator_category>::value,
+      void>::type
   {
     clear();
     insert(end(), first, last, typename std::iterator_traits<InputIter>::iterator_category());
@@ -235,7 +236,7 @@ public:
       _storage.resize(size() * sizeof(T));
     }
   }
-  auto page_size() const noexcept -> std::size_t { return _storage.page_size(); }
+  static auto page_size() noexcept -> std::size_t { return storage_type::page_size(); }
 
   // Modifiers
 
@@ -264,9 +265,10 @@ public:
   }
 
   template<typename InputIter>
-  auto insert(const_iterator pos, InputIter first, InputIter last) -> typename std::enable_if<
-    std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<InputIter>::iterator_category>::value,
-    iterator>::type
+  auto insert(const_iterator pos, InputIter first, InputIter last) ->
+    typename std::enable_if<
+      std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<InputIter>::iterator_category>::value,
+      iterator>::type
   {
     assert(is_valid_last_iterator(pos));
     return insert(pos, first, last, typename std::iterator_traits<InputIter>::iterator_category());

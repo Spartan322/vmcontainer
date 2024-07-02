@@ -115,7 +115,7 @@ public:
   auto base() const noexcept -> void* { return _reservation.base(); }
   auto committed_bytes() const noexcept -> std::size_t { return _committed_bytes; }
   auto reserved_bytes() const noexcept -> std::size_t { return _reservation.reserved_bytes(); }
-  auto page_size() const noexcept -> std::size_t { return VirtualMemorySystem::page_size(); }
+  static auto page_size() noexcept -> std::size_t { return VirtualMemorySystem::page_size(); }
 
 private:
   reservation_base<VirtualMemorySystem> _reservation;
